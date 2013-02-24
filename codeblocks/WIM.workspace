@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_workspace_file>
 	<Workspace title="WIM project">
-		<Project filename="WIM TCP Server Lib/WIM TCP Server Lib.cbp" />
+		<Project filename="WIM Session Lib/WIM Session Lib.cbp" />
+		<Project filename="WIM TCP Server Lib/WIM TCP Server Lib.cbp">
+			<Depends filename="WIM Session Lib/WIM Session Lib.cbp" />
+		</Project>
 		<Project filename="WIM server/WIM server.cbp" />
 		<Project filename="WIM test client/WIM test client.cbp" />
 	</Workspace>

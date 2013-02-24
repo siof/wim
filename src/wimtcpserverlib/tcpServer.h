@@ -18,21 +18,18 @@
 #ifndef TCPSERVER_H_INCLUDED
 #define TCPSERVER_H_INCLUDED
 
+#include <memory>
 #include <string>
 
 #include <boost/asio.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/thread/thread.hpp>
+
+#include "sessionMgr.h"
 
 namespace basio = boost::asio;
 
 namespace WIM
 {
-    class Session;
-
-namespace TcpServer
-{
-
     class Server
     {
     public:
@@ -50,14 +47,15 @@ namespace TcpServer
 
     private:
         void AcceptNewConnection();
-        void HandleNewConnection(boost::shared_ptr<Session> newSession, const boost::system::error_code& error);
+        void HandleNewConnection(std::shared_ptr<Session> newSession, const boost::system::error_code& error);
 
-        boost::shared_ptr<basio::io_service> m_service;
-        boost::shared_ptr<basio::ip::tcp::acceptor> m_acceptor;
+        std::shared_ptr<basio::io_service> m_service;
+        std::shared_ptr<basio::ip::tcp::acceptor> m_acceptor;
+
+        WIM::SessionMgr sessionMgr;
 
         boost::thread_group m_runThreads;
     };
-}
 }
 
 #endif // TCPSERVER_H_INCLUDED

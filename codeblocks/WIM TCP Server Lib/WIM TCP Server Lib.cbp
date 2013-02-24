@@ -35,9 +35,11 @@
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-std=c++0x" />
 			<Add directory="/usr/include" />
 			<Add directory="/usr/local/include" />
 		</Compiler>
+		<Unit filename="../../src/wimtcpserverlib/sessionMgr.cpp" />
 		<Unit filename="../../src/wimtcpserverlib/sessionMgr.h" />
 		<Unit filename="../../src/wimtcpserverlib/tcpServer.cpp" />
 		<Unit filename="../../src/wimtcpserverlib/tcpServer.h" />

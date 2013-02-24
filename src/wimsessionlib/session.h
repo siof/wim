@@ -18,6 +18,8 @@
 #ifndef SESSION_H_INCLUDED
 #define SESSION_H_INCLUDED
 
+#include <memory>
+
 #include <boost/asio.hpp>
 
 namespace basio = boost::asio;
@@ -46,7 +48,7 @@ namespace WIM
         virtual void HandlePacketHeaderReaded() = 0;
         virtual void handlePacketDataReaded() = 0;
 
-        basio::ip::tcp::socket m_socket;
+        std::shared_ptr<basio::ip::tcp::socket> m_socket;
     };
 }
 
