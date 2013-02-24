@@ -7,7 +7,7 @@
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="WIM Session Lib" prefix_auto="1" extension_auto="1" />
+				<Option output="WIMSession" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="" />
 				<Option object_output="WIMS/obj/Debug/" />
 				<Option type="2" />
@@ -34,9 +34,10 @@
 				</Linker>
 			</Target>
 		</Build>
-		<Unit filename="main.c">
-			<Option compilerVar="CC" />
-		</Unit>
+		<Compiler>
+			<Add option="-std=c++0x" />
+		</Compiler>
+		<Unit filename="../../src/wimsessionlib/session.h" />
 		<Extensions>
 			<envvars />
 			<code_completion />

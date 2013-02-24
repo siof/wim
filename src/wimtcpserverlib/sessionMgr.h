@@ -18,8 +18,9 @@
 #ifndef SESSIONMGR_H_INCLUDED
 #define SESSIONMGR_H_INCLUDED
 
+#include <memory>
+
 #include <boost/asio/io_service.hpp>
-#include <boost/shared_ptr.hpp>
 
 #include "../wimsessionlib/session.h"
 
@@ -31,18 +32,13 @@ namespace WIM
     class SessionMgr
     {
     public:
-        const SessionMgr const * Instance();
-
-        boost::shared_ptr<Session> CreateNewSession(boost::shared_ptr<basio::io_service> service);
-    private:
         SessionMgr() {}
-        SessionMgr(const SessionMgr&) {}
+        ~SessionMgr() {}
 
-        SessionMgr * m_sessionMgr;
+        std::shared_ptr<Session> CreateNewSession(std::shared_ptr<basio::io_service> service);
+    private:
+
     };
-
-    #define sSessionMgr SessionMgr::Instance()
-    #define sSessionManager SessionMgr::Instance()
 }
 
 #endif // SESSIONMGR_H_INCLUDED

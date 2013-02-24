@@ -29,6 +29,7 @@
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-std=c++0x" />
 			<Add option="-Wall" />
 		</Compiler>
 		<Unit filename="../../src/wimserver/main.cpp" />
