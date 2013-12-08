@@ -5,6 +5,7 @@
 		<Option title="WIM server" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
+		<Option virtualFolders="Sources/;sources/;headers/;sources/server/;sources/sessionmgr/;headers/server/;headers/sessionmgr/;" />
 		<Build>
 			<Target title="Debug">
 				<Option output="WIMS/bin/Debug/WIM server" prefix_auto="1" extension_auto="1" />
@@ -12,7 +13,10 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-std=c++11" />
+					<Add option="-Wall" />
 					<Add option="-g" />
+					<Add option="-ftrapv" />
 				</Compiler>
 			</Target>
 			<Target title="Release">
@@ -32,7 +36,34 @@
 			<Add option="-std=c++0x" />
 			<Add option="-Wall" />
 		</Compiler>
-		<Unit filename="../../src/wimserver/main.cpp" />
+		<Linker>
+			<Add library="boost_system" />
+			<Add library="boost_thread" />
+		</Linker>
+		<Unit filename="../../src/wimserver/defines.h">
+			<Option virtualFolder="headers/" />
+		</Unit>
+		<Unit filename="../../src/wimserver/main.cpp">
+			<Option virtualFolder="sources/" />
+		</Unit>
+		<Unit filename="../../src/wimserver/server/tcpServer.cpp">
+			<Option virtualFolder="sources/server/" />
+		</Unit>
+		<Unit filename="../../src/wimserver/server/tcpServer.h">
+			<Option virtualFolder="headers/server/" />
+		</Unit>
+		<Unit filename="../../src/wimserver/sessionmgr/sessionMgr.cpp">
+			<Option virtualFolder="sources/sessionmgr/" />
+		</Unit>
+		<Unit filename="../../src/wimserver/sessionmgr/sessionMgr.h">
+			<Option virtualFolder="headers/sessionmgr/" />
+		</Unit>
+		<Unit filename="../../src/wimserver/sessionmgr/userSession.cpp">
+			<Option virtualFolder="sources/sessionmgr/" />
+		</Unit>
+		<Unit filename="../../src/wimserver/sessionmgr/userSession.h">
+			<Option virtualFolder="headers/sessionmgr/" />
+		</Unit>
 		<Extensions>
 			<envvars />
 			<code_completion />

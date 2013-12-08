@@ -15,41 +15,35 @@
 *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef SESSION_H_INCLUDED
-#define SESSION_H_INCLUDED
+#ifndef SESSIONMGR_H_INCLUDED
+#define SESSIONMGR_H_INCLUDED
 
 #include <memory>
+#include <unordered_map>
 
-#include <boost/asio.hpp>
+#include <boost/asio/io_service.hpp>
+
+#include "userSession.h"
 
 namespace basio = boost::asio;
 
 namespace WIM
 {
-    class Session
+    // session manager
+    class SessionMgr
     {
     public:
-        Session(basio::io_service & service);
-        virtual ~Session() {}
+        SessionMgr() {}
+        SessionMgr(const SessionMgr&) {}
+        ~SessionMgr() {}
 
-        virtual void StartSession() { ReadPacketHeader(); }
+        std::shared_ptr<UserSession> CreateNewSession(std::shared_ptr<basio::io_service> service);
 
-        virtual void ReadPacketHeader() = 0;
-        virtual void ReadPacketData() = 0;
-
-        virtual void ProcessPacket() {}
-        virtual void SendPacket() {}
+        void StartSession(std::shared_ptr<UserSession> session);
     private:
-        // we don't want default and copy ctors to be available
-        Session() {}
-        Session(const Session&) {}
+        std::unordered_map<uint64_t, std::shared_ptr<UserSession> > sessions_;
 
-        virtual void HandlePacketWritten() {}
-        virtual void HandlePacketHeaderReaded() = 0;
-        virtual void handlePacketDataReaded() = 0;
-
-        std::shared_ptr<basio::ip::tcp::socket> m_socket;
     };
 }
 
-#endif // SESSION_H_INCLUDED
+#endif // SESSIONMGR_H_INCLUDED

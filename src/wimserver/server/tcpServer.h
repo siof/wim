@@ -24,7 +24,7 @@
 #include <boost/asio.hpp>
 #include <boost/thread/thread.hpp>
 
-#include "sessionMgr.h"
+#include "../sessionmgr/sessionMgr.h"
 
 namespace basio = boost::asio;
 
@@ -38,6 +38,7 @@ namespace WIM
 
         void Run(uint32_t threadCount);
         void Stop();
+        void Kill();
 
         uint32_t GetListenPort();
         std::string GetAddress();
@@ -47,7 +48,7 @@ namespace WIM
 
     private:
         void AcceptNewConnection();
-        void HandleNewConnection(std::shared_ptr<Session> newSession, const boost::system::error_code& error);
+        void HandleNewConnection(std::shared_ptr<UserSession> newSession, const boost::system::error_code& error);
 
         std::shared_ptr<basio::io_service> m_service;
         std::shared_ptr<basio::ip::tcp::acceptor> m_acceptor;

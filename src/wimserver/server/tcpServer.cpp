@@ -17,19 +17,22 @@
 
 #include "tcpServer.h"
 
-#include "../wimsessionlib/Session.h"
+#include "../sessionmgr/userSession.h"
 
 namespace WIM
 {
     Server::Server(const std::string & address, const std::string & port)
     {
+        // create service and acceptor to accept new connections
         m_service = std::shared_ptr<basio::io_service>(new basio::io_service());
         m_acceptor = std::shared_ptr<basio::ip::tcp::acceptor>(new basio::ip::tcp::acceptor(*m_service));
 
+        // resolve bind address
         basio::ip::tcp::resolver resolver(*m_service);
         basio::ip::tcp::resolver::query query(address, port);
         basio::ip::tcp::endpoint endpoint = *resolver.resolve(query);
 
+        // bind acceptor to specified address and listen to new connections
         m_acceptor->open(endpoint.protocol());
         m_acceptor->set_option(basio::ip::tcp::acceptor::reuse_address(true));
         m_acceptor->bind(endpoint);
@@ -38,14 +41,24 @@ namespace WIM
 
     Server::~Server()
     {
+        // stop service if needed
         if (!m_service->stopped())
             Stop();
     }
 
     void Server::Run(uint32_t threadCount)
     {
+        // run server on specified amount of threads
         for (uint32_t i = 0; i < threadCount; ++i)
             m_runThreads.add_thread(new boost::thread(boost::bind(&basio::io_service::run, m_service.get())));
+    }
+
+    void Server::Kill()
+    {
+        // cancel async connections
+        m_acceptor->cancel();
+        // and stop server
+        Stop();
     }
 
     void Server::Stop()
@@ -53,9 +66,7 @@ namespace WIM
         // we don't want to have any 'error' exceptions here
         boost::system::error_code ec;
 
-        // should we cancel all started async operations ? i don't think so ;p
-        //m_acceptor->cancel();
-
+        // close acceptor for new connections and stop service
         m_acceptor->close(ec);
         m_service->stop();
 
@@ -85,13 +96,13 @@ namespace WIM
 
     void Server::AcceptNewConnection()
     {
-        // create session
-        std::shared_ptr<Session> newSession = sessionMgr.CreateNewSession(m_service);
+        // create session element
+        std::shared_ptr<UserSession> newSession = sessionMgr.CreateNewSession(m_service);
         // and wait for new session
         m_acceptor->async_accept(newSession->GetSocket(), boost::bind(&Server::HandleNewConnection, this, newSession, basio::placeholders::error));
     }
 
-    void Server::HandleNewConnection(std::shared_ptr<Session> newSession, const boost::system::error_code& error)
+    void Server::HandleNewConnection(std::shared_ptr<UserSession> newSession, const boost::system::error_code& error)
     {
         if (error)
         {
