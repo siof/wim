@@ -15,30 +15,20 @@
 *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef SESSIONMGR_H_INCLUDED
-#define SESSIONMGR_H_INCLUDED
-
-#include <memory>
-
-#include <boost/asio/io_service.hpp>
-
-#include "../wimsessionlib/session.h"
-
-namespace basio = boost::asio;
+#include "sessionMgr.h"
 
 namespace WIM
 {
-    // singleton based session manager implementation - exactly this should be problably called user manager or user session manager
-    class SessionMgr
+    std::shared_ptr<UserSession> SessionMgr::CreateNewSession(std::shared_ptr<asio::io_service> service)
     {
-    public:
-        SessionMgr() {}
-        ~SessionMgr() {}
+        // placeholder - missing server session implementation
 
-        std::shared_ptr<Session> CreateNewSession(std::shared_ptr<basio::io_service> service);
-    private:
+        return std::shared_ptr<UserSession>(nullptr);
+    }
 
-    };
+    void SessionMgr::StartSession(std::shared_ptr<UserSession> session)
+    {
+
+    }
+
 }
-
-#endif // SESSIONMGR_H_INCLUDED
