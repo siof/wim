@@ -18,14 +18,13 @@
 #ifndef SESSIONMGR_H_INCLUDED
 #define SESSIONMGR_H_INCLUDED
 
+#include <atomic>
 #include <memory>
 #include <unordered_map>
 
-#include <boost/asio/io_service.hpp>
+#include <asio/io_service.hpp>
 
 #include "userSession.h"
-
-namespace basio = boost::asio;
 
 namespace WIM
 {
@@ -37,12 +36,12 @@ namespace WIM
         SessionMgr(const SessionMgr&) {}
         ~SessionMgr() {}
 
-        std::shared_ptr<UserSession> CreateNewSession(std::shared_ptr<basio::io_service> service);
+        std::shared_ptr<UserSession> CreateNewSession(std::shared_ptr<asio::io_service> service);
 
         void StartSession(std::shared_ptr<UserSession> session);
     private:
+        std::atomic<uint64_t> sessionCounter_;
         std::unordered_map<uint64_t, std::shared_ptr<UserSession> > sessions_;
-
     };
 }
 

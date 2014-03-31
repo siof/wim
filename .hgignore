@@ -7,3 +7,6 @@ syntax: glob
 WIMS
 *.a
 *.so
+Debug\
+*.sdf
+*.opensdf

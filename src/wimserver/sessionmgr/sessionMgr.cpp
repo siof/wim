@@ -23,12 +23,13 @@ namespace WIM
     {
         // placeholder - missing server session implementation
 
-        return std::shared_ptr<UserSession>(nullptr);
+        return std::shared_ptr<UserSession>(new UserSession(service));
     }
 
     void SessionMgr::StartSession(std::shared_ptr<UserSession> session)
     {
-
+        uint64_t tmpId = ++sessionCounter_;
+        sessions_[tmpId] = session;
+        session->StartSession(tmpId);
     }
-
 }

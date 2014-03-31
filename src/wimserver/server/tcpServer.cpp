@@ -17,32 +17,36 @@
 
 #include "tcpServer.h"
 
-#include "../sessionmgr/userSession.h"
+#include <functional>
+#include <iostream>
+
+#include "../sessionMgr/userSession.h"
 
 namespace WIM
 {
     Server::Server(const std::string & address, const std::string & port)
     {
         // create service and acceptor to accept new connections
-        m_service = std::shared_ptr<basio::io_service>(new basio::io_service());
-        m_acceptor = std::shared_ptr<basio::ip::tcp::acceptor>(new basio::ip::tcp::acceptor(*m_service));
+        service_ = std::shared_ptr<asio::io_service>(new asio::io_service());
+        acceptor_ = std::shared_ptr<asio::ip::tcp::acceptor>(new asio::ip::tcp::acceptor(*service_));
 
         // resolve bind address
-        basio::ip::tcp::resolver resolver(*m_service);
-        basio::ip::tcp::resolver::query query(address, port);
-        basio::ip::tcp::endpoint endpoint = *resolver.resolve(query);
+        asio::ip::tcp::resolver resolver(*service_);
+        asio::ip::tcp::resolver::query query(address, port);
+        asio::ip::tcp::endpoint endpoint = *resolver.resolve(query);
 
         // bind acceptor to specified address and listen to new connections
-        m_acceptor->open(endpoint.protocol());
-        m_acceptor->set_option(basio::ip::tcp::acceptor::reuse_address(true));
-        m_acceptor->bind(endpoint);
-        m_acceptor->listen(basio::socket_base::max_connections);
+        acceptor_->open(endpoint.protocol());
+        acceptor_->set_option(asio::ip::tcp::acceptor::reuse_address(true));
+        acceptor_->set_option(asio::ip::tcp::acceptor::keep_alive(true));
+        acceptor_->bind(endpoint);
+        acceptor_->listen(asio::socket_base::max_connections);
     }
 
     Server::~Server()
     {
         // stop service if needed
-        if (!m_service->stopped())
+        if (!service_->stopped())
             Stop();
     }
 
@@ -50,13 +54,13 @@ namespace WIM
     {
         // run server on specified amount of threads
         for (uint32_t i = 0; i < threadCount; ++i)
-            m_runThreads.add_thread(new boost::thread(boost::bind(&basio::io_service::run, m_service.get())));
+            threads_.push_back(new std::thread([this]() -> void {service_->run();}));
     }
 
     void Server::Kill()
     {
         // cancel async connections
-        m_acceptor->cancel();
+        acceptor_->cancel();
         // and stop server
         Stop();
     }
@@ -64,29 +68,29 @@ namespace WIM
     void Server::Stop()
     {
         // we don't want to have any 'error' exceptions here
-        boost::system::error_code ec;
+        asio::error_code ec;
 
         // close acceptor for new connections and stop service
-        m_acceptor->close(ec);
-        m_service->stop();
+        acceptor_->close(ec);
+        service_->stop();
 
         // wait for end of io_service::run() in threads
-        m_runThreads.join_all();
+        WaitForAll();
     }
 
     uint32_t Server::GetListenPort()
     {
-        return m_acceptor->local_endpoint().port();
+        return acceptor_->local_endpoint().port();
     }
 
     std::string Server::GetAddress()
     {
-        return m_acceptor->local_endpoint().address().to_string();
+        return acceptor_->local_endpoint().address().to_string();
     }
 
     void Server::JoinAll()
     {
-        m_runThreads.join_all();
+        std::for_each(threads_.begin(), threads_.end(), std::bind(&std::thread::join, std::placeholders::_1));
     }
 
     void Server::WaitForAll()
@@ -97,12 +101,12 @@ namespace WIM
     void Server::AcceptNewConnection()
     {
         // create session element
-        std::shared_ptr<UserSession> newSession = sessionMgr.CreateNewSession(m_service);
+        std::shared_ptr<UserSession> newSession = sessionMgr_.CreateNewSession(service_);
         // and wait for new session
-        m_acceptor->async_accept(newSession->GetSocket(), boost::bind(&Server::HandleNewConnection, this, newSession, basio::placeholders::error));
+        acceptor_->async_accept(*newSession->GetSocket(), std::bind(&Server::HandleNewConnection, this, newSession, std::placeholders::_1));
     }
 
-    void Server::HandleNewConnection(std::shared_ptr<UserSession> newSession, const boost::system::error_code& error)
+    void Server::HandleNewConnection(std::shared_ptr<UserSession> newSession, const asio::error_code& error)
     {
         if (error)
         {
@@ -111,7 +115,7 @@ namespace WIM
             return;
         }
 
-        sessionMgr.StartSession(newSession);
+        sessionMgr_.StartSession(newSession);
         AcceptNewConnection();
     }
 }
