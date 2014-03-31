@@ -20,13 +20,11 @@
 
 #include <memory>
 #include <string>
+#include <thread>
 
-#include <boost/asio.hpp>
-#include <boost/thread/thread.hpp>
+#include <asio.hpp>
 
-#include "../sessionmgr/sessionMgr.h"
-
-namespace basio = boost::asio;
+#include "../sessionMgr/sessionMgr.h"
 
 namespace WIM
 {
@@ -48,14 +46,14 @@ namespace WIM
 
     private:
         void AcceptNewConnection();
-        void HandleNewConnection(std::shared_ptr<UserSession> newSession, const boost::system::error_code& error);
+        void HandleNewConnection(std::shared_ptr<UserSession> newSession, const asio::error_code & error);
 
-        std::shared_ptr<basio::io_service> m_service;
-        std::shared_ptr<basio::ip::tcp::acceptor> m_acceptor;
+        std::shared_ptr<asio::io_service> service_;
+        std::shared_ptr<asio::ip::tcp::acceptor> acceptor_;
 
-        WIM::SessionMgr sessionMgr;
+        WIM::SessionMgr sessionMgr_;
 
-        boost::thread_group m_runThreads;
+        std::vector<std::thread *> threads_;
     };
 }
 

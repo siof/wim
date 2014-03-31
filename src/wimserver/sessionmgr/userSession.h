@@ -1,43 +1,41 @@
 #ifndef USERSESSION_H_INCLUDED
 #define USERSESSION_H_INCLUDED
 
-#include "../defines.h"
+#include <memory>
 
-#include <boost/asio.hpp>
+#include <asio.hpp>
+
+#include "../defines.h"
 
 namespace WIM
 {
-    class UserSession
+    class UserSession : public std::enable_shared_from_this<UserSession>
     {
     public:
-        UserSession(asio::io_service & service, const uint64_t & sessionId):
-            m_socket(service), sessionId_(sessionId)
-        {
+        UserSession(std::shared_ptr<asio::io_service> service);
+        ~UserSession();
 
-        }
+        void StartSession(const uint64_t & sessionId);
 
-        virtual ~UserSession() {}
+        void ReadPacketHeader();
+        void ReadPacketData();
 
-        virtual void StartSession() { ReadPacketHeader(); }
+        void ProcessPacket();
+        void SendPacket();
 
-        virtual void ReadPacketHeader() = 0;
-        virtual void ReadPacketData() = 0;
-
-        virtual void ProcessPacket() {}
-        virtual void SendPacket() {}
-
-        asio::ip::tcp::socket & GetSocket()
-        {
-            return m_socket;
-        }
+        std::shared_ptr<asio::ip::tcp::socket> GetSocket();
 
     private:
+        UserSession() {}
+        UserSession(const UserSession &) {}
 
-        virtual void HandlePacketWritten() {}
-        virtual void HandlePacketHeaderReaded() = 0;
-        virtual void handlePacketDataReaded() = 0;
+        void HandlePacketWritten();
+        void HandlePacketHeaderReaded(const asio::error_code & error);
+        void HandlePacketDataReaded(const asio::error_code & error);
 
-        asio::ip::tcp::socket m_socket;
+        std::shared_ptr<asio::ip::tcp::socket> socket_;
+
+        uint32_t readSize_;
 
         uint64_t sessionId_;
     };
